@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AsistenciasController;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\SociosController;
 use App\Http\Controllers\UsuariosController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,10 +22,11 @@ Route::post('/logout', [AuthController::class, 'logout'])
 // Rutas protegidas
 Route::middleware('auth')->group(function () {
     Route::get('/', function () {
-        return view('welcome');
-    });
+        return redirect()->route('asistencias.create');
+    })->middleware('auth');
 
     Route::resource('roles', RolesController::class)->parameters(['roles' => 'rol']);
+    Route::resource('socios', SociosController::class);
     Route::resource('usuarios', UsuariosController::class);
 
     Route::get('/asistencias/recepcion', [AsistenciasController::class, 'create'])->name('asistencias.create');

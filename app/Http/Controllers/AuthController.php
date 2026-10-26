@@ -43,7 +43,7 @@ class AuthController extends Controller
         ])) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/');
+            return redirect()->route('asistencias.create');
         }
 
         // Si las credenciales son correctas pero la cuenta está desactivada,
@@ -74,4 +74,3 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 }
-
