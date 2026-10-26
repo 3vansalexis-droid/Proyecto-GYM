@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AsistenciasController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsuariosController;
 use Illuminate\Support\Facades\Route;
@@ -25,4 +26,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('roles', RolesController::class)->parameters(['roles' => 'rol']);
     Route::resource('usuarios', UsuariosController::class);
+
+    Route::get('/asistencias/recepcion', [AsistenciasController::class, 'create'])->name('asistencias.create');
+    Route::post('/asistencias/recepcion', [AsistenciasController::class, 'store'])->name('asistencias.store');
 });
