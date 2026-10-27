@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class Usuario extends Authenticatable
 {
@@ -33,15 +35,31 @@ class Usuario extends Authenticatable
         return [
             'activo' => 'boolean',
             'creado_en' => 'datetime',
-            'password_hash' => 'hashed',
         ];
     }
 
+    /**
+     * Encripta la contraseña con Hash::make() al asignarla.
+     * Si el valor ya es un hash, se guarda tal cual (evita doble encriptación).
+     */
+    protected function passwordHash(): Attribute
+    {
+        return Attribute::make(
+            set: fn (string $value) => Hash::isHashed($value) ? $value : Hash::make($value),
+        );
+    }
+
+    /**
+     * Columna usada por Auth para verificar la contraseña.
+     */
     public function getAuthPasswordName(): string
     {
         return 'password_hash';
     }
 
+    /**
+     * Un usuario pertenece a un rol.
+     */
     public function rol(): BelongsTo
     {
         return $this->belongsTo(Rol::class, 'rol_id');
