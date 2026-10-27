@@ -42,7 +42,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('socios', SociosController::class);
         Route::get('/asistencias/recepcion', [AsistenciasController::class, 'create'])->name('asistencias.create');
         Route::post('/asistencias/recepcion', [AsistenciasController::class, 'store'])->name('asistencias.store');
-        Route::resource('asistencias', AsistenciasController::class);
+        Route::resource('asistencias', AsistenciasController::class)
+            ->except(['create', 'store']);
         Route::resource('suscripciones', SuscripcionController::class)->parameters(['suscripciones' => 'suscripcion']);
         Route::resource('pagos', PagoController::class);
     });
