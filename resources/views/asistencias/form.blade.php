@@ -5,6 +5,16 @@
 @section('content')
     <div class="card shadow-sm border-0 mx-auto" style="max-width: 900px;">
         <div class="card-body p-4">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form method="POST" action="{{ isset($asistencia->id) ? route('asistencias.update', $asistencia) : route('asistencias.store') }}">
                 @csrf
                 @if (isset($asistencia->id))
@@ -14,11 +24,25 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Socio</label>
-                        <input type="number" name="socio_id" class="form-control" value="{{ old('socio_id', $asistencia->socio_id ?? '') }}" required>
+                        <select name="socio_id" class="form-select" required>
+                            <option value="">-- Seleccionar socio --</option>
+                            @foreach ($socios ?? [] as $socio)
+                                <option value="{{ $socio->id }}" @selected(old('socio_id', $asistencia->socio_id ?? '') == $socio->id)>
+                                    {{ $socio->clave_socio }} - {{ $socio->nombre }} {{ $socio->apellidos }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Usuario</label>
-                        <input type="number" name="usuario_id" class="form-control" value="{{ old('usuario_id', $asistencia->usuario_id ?? '') }}" required>
+                        <select name="usuario_id" class="form-select" required>
+                            <option value="">-- Seleccionar usuario --</option>
+                            @foreach ($usuarios ?? [] as $usuario)
+                                <option value="{{ $usuario->id }}" @selected(old('usuario_id', $asistencia->usuario_id ?? '') == $usuario->id)>
+                                    {{ $usuario->nombre }} ({{ $usuario->email }})
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="col-12">
                         <label class="form-label">Fecha y hora</label>
