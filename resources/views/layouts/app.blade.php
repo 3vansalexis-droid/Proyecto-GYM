@@ -40,16 +40,18 @@
                                 <i class="bi bi-people-fill me-1"></i>Socios
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('usuarios.index') }}">
-                                <i class="bi bi-person-badge-fill me-1"></i>Usuarios
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('roles.index') }}">
-                                <i class="bi bi-shield-lock-fill me-1"></i>Roles
-                            </a>
-                        </li>
+                        @if (Auth::user()->rol?->nombre === 'Administrador')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('usuarios.index') }}">
+                                    <i class="bi bi-person-badge-fill me-1"></i>Usuarios
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('roles.index') }}">
+                                    <i class="bi bi-shield-lock-fill me-1"></i>Roles
+                                </a>
+                            </li>
+                        @endif
                     </ul>
 
                     @auth
