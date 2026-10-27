@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class Usuario extends Authenticatable
 {
@@ -14,6 +16,8 @@ class Usuario extends Authenticatable
     protected $table = 'usuarios';
 
     public $timestamps = false;
+
+    protected $with = ['rol'];
 
     protected $fillable = [
         'rol_id',
@@ -33,8 +37,14 @@ class Usuario extends Authenticatable
         return [
             'activo' => 'boolean',
             'creado_en' => 'datetime',
-            'password_hash' => 'hashed',
         ];
+    }
+
+    protected function passwordHash(): Attribute
+    {
+        return Attribute::make(
+            set: fn (string $value) => Hash::isHashed($value) ? $value : Hash::make($value),
+        );
     }
 
     public function getAuthPasswordName(): string

@@ -39,4 +39,9 @@ class Clase extends Model
     {
         return $this->hasMany(InscripcionClase::class, 'clase_id');
     }
+
+    public function inscripciones(): HasMany
+    {
+        return $this->inscripcionClases();
+    }
 }
