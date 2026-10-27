@@ -35,11 +35,39 @@
                                 <i class="bi bi-calendar-check me-1"></i>Recepción
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('socios.index') }}">
-                                <i class="bi bi-people-fill me-1"></i>Socios
-                            </a>
-                        </li>
+                        @if (in_array(Auth::user()->rol?->nombre, ['Administrador', 'Recepcionista'], true))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('socios.index') }}">
+                                    <i class="bi bi-people-fill me-1"></i>Socios
+                                </a>
+                            </li>
+                        @endif
+                        @if (Auth::user()->rol?->nombre === 'Administrador')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('tipos-membresia.index') }}">
+                                    <i class="bi bi-card-checklist me-1"></i>Membresías
+                                </a>
+                            </li>
+                        @endif
+                        @if (in_array(Auth::user()->rol?->nombre, ['Administrador', 'Recepcionista'], true))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('suscripciones.index') }}">
+                                    <i class="bi bi-calendar-plus me-1"></i>Suscripciones
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('pagos.index') }}">
+                                    <i class="bi bi-cash-coin me-1"></i>Pagos
+                                </a>
+                            </li>
+                        @endif
+                        @if (in_array(Auth::user()->rol?->nombre, ['Administrador', 'Entrenador'], true))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('clases.index') }}">
+                                    <i class="bi bi-calendar-event me-1"></i>Clases
+                                </a>
+                            </li>
+                        @endif
                         @if (Auth::user()->rol?->nombre === 'Administrador')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('usuarios.index') }}">

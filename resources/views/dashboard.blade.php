@@ -69,12 +69,21 @@
                 <div class="card-body">
                     <h2 class="h5 mb-3">Accesos rápidos</h2>
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ route('socios.index') }}" class="btn btn-outline-primary">Socios</a>
-                        <a href="{{ route('suscripciones.index') }}" class="btn btn-outline-primary">Suscripciones</a>
-                        <a href="{{ route('pagos.index') }}" class="btn btn-outline-primary">Pagos</a>
-                        <a href="{{ route('asistencias.index') }}" class="btn btn-outline-primary">Asistencias</a>
-                        <a href="{{ route('clases.index') }}" class="btn btn-outline-primary">Clases</a>
-                        <a href="{{ route('entrenadores.index') }}" class="btn btn-outline-primary">Entrenadores</a>
+                        @php($rol = Auth::user()->rol?->nombre)
+                        @if (in_array($rol, ['Administrador', 'Recepcionista'], true))
+                            <a href="{{ route('socios.index') }}" class="btn btn-outline-primary">Socios</a>
+                            <a href="{{ route('suscripciones.index') }}" class="btn btn-outline-primary">Suscripciones</a>
+                            <a href="{{ route('pagos.index') }}" class="btn btn-outline-primary">Pagos</a>
+                            <a href="{{ route('asistencias.index') }}" class="btn btn-outline-primary">Asistencias</a>
+                        @endif
+                        @if (in_array($rol, ['Administrador', 'Entrenador'], true))
+                            <a href="{{ route('clases.index') }}" class="btn btn-outline-primary">Clases</a>
+                        @endif
+                        @if ($rol === 'Administrador')
+                            <a href="{{ route('tipos-membresia.index') }}" class="btn btn-outline-primary">Tipos de membresía</a>
+                            <a href="{{ route('entrenadores.index') }}" class="btn btn-outline-primary">Entrenadores</a>
+                            <a href="{{ route('inscripciones.index') }}" class="btn btn-outline-primary">Inscripciones</a>
+                        @endif
                     </div>
                 </div>
             </div>

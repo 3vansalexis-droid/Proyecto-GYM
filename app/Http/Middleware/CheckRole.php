@@ -8,9 +8,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, string $rol): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if (! $request->user() || $request->user()->rol?->nombre !== $rol) {
+        if (! $request->user() || ! in_array($request->user()->rol?->nombre, $roles, true)) {
             abort(403, 'Acceso denegado: No tienes permisos para entrar aquí.');
         }
 

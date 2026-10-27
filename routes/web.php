@@ -34,19 +34,24 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:Administrador')->group(function () {
         Route::resource('roles', RolesController::class)->parameters(['roles' => 'rol']);
         Route::resource('usuarios', UsuariosController::class);
+        Route::resource('tipos-membresia', TipoMembresiaController::class);
+        Route::resource('entrenadores', EntrenadorController::class)->parameters(['entrenadores' => 'entrenador']);
+        Route::resource('inscripcion-clases', InscripcionClaseController::class)->names('inscripciones');
     });
-    Route::resource('socios', SociosController::class);
-    Route::get('/asistencias/recepcion', [AsistenciasController::class, 'create'])->name('asistencias.create');
-    Route::post('/asistencias/recepcion', [AsistenciasController::class, 'store'])->name('asistencias.store');
-    Route::resource('asistencias', AsistenciasController::class);
 
-   
-    Route::resource('tipos-membresia', TipoMembresiaController::class);
-    Route::resource('suscripciones', SuscripcionController::class)->parameters(['suscripciones' => 'suscripcion']);
-    Route::resource('pagos', PagoController::class);
-    Route::resource('entrenadores', EntrenadorController::class)->parameters(['entrenadores' => 'entrenador']);
-    Route::resource('clases', ClaseController::class);
-    Route::resource('inscripcion-clases', InscripcionClaseController::class)->names('inscripciones');
+    Route::middleware('role:Administrador,Recepcionista')->group(function () {
+        Route::resource('socios', SociosController::class);
+        Route::get('/asistencias/recepcion', [AsistenciasController::class, 'create'])->name('asistencias.create');
+        Route::post('/asistencias/recepcion', [AsistenciasController::class, 'store'])->name('asistencias.store');
+        Route::resource('asistencias', AsistenciasController::class);
+        Route::resource('suscripciones', SuscripcionController::class)->parameters(['suscripciones' => 'suscripcion']);
+        Route::resource('pagos', PagoController::class);
+    });
+
+    Route::middleware('role:Administrador,Entrenador')->group(function () {
+        Route::resource('clases', ClaseController::class);
+    });
+
     Route::redirect('/inscripciones', '/inscripcion-clases');
     Route::redirect('/inscripciones/create', '/inscripcion-clases/create');
 });
