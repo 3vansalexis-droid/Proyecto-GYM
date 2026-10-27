@@ -2,54 +2,80 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreInscripcionClaseRequest;
-use App\Http\Requests\UpdateInscripcionClaseRequest;
+use App\Models\Clase;
 use App\Models\InscripcionClase;
+use App\Models\Socio;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class InscripcionClaseController extends Controller
 {
     public function index(): View
     {
-        $inscripciones = InscripcionClase::with(['clase', 'socio'])->orderBy('fecha_inscripcion')->get();
+        $inscripciones = InscripcionClase::with(['clase', 'socio'])
+            ->orderBy('id', 'desc')
+            ->get();
 
         return view('inscripcion-clases.index', compact('inscripciones'));
     }
 
     public function create(): View
     {
-        return view('inscripcion-clases.form', ['inscripcion' => new InscripcionClase()]);
+        $clases = Clase::with('entrenador')->orderBy('nombre')->get();
+        $socios = Socio::orderBy('nombre')->get();
+
+        return view('inscripcion-clases.create', compact('clases', 'socios'));
     }
 
-    public function store(StoreInscripcionClaseRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        InscripcionClase::create($request->validated());
+        $request->validate([
+            'clase_id' => 'required|exists:clases,id',
+            'socio_id' => 'required|exists:socios,id',
+        ]);
 
-        return redirect()->route('inscripcion-clases.index')->with('success', 'Inscripción registrada correctamente.');
+        try {
+            DB::transaction(function () use ($request) {
+                $clase = Clase::where('id', $request->clase_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $totalInscritos = InscripcionClase::where('clase_id', $clase->id)->count();
+
+                if ($totalInscritos >= $clase->cupo_maximo) {
+                    throw new \Exception('No hay cupo disponible en esta clase.');
+                }
+
+                $yaInscrito = InscripcionClase::where('clase_id', $clase->id)
+                    ->where('socio_id', $request->socio_id)
+                    ->exists();
+
+                if ($yaInscrito) {
+                    throw new \Exception('El socio ya está inscrito en esta clase.');
+                }
+
+                InscripcionClase::create([
+                    'clase_id' => $clase->id,
+                    'socio_id' => $request->socio_id,
+                    'fecha_inscripcion' => now()->toDateString(),
+                ]);
+            });
+
+            return redirect()->route('inscripciones.index')
+                ->with('success', 'Socio inscrito correctamente en la clase.');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
     }
 
-    public function show(InscripcionClase $inscripcionClase): View
+    public function destroy($id): RedirectResponse
     {
-        return view('inscripcion-clases.show', compact('inscripcionClase'));
-    }
+        $inscripcion = InscripcionClase::findOrFail($id);
+        $inscripcion->delete();
 
-    public function edit(InscripcionClase $inscripcionClase): View
-    {
-        return view('inscripcion-clases.form', compact('inscripcionClase'));
-    }
-
-    public function update(UpdateInscripcionClaseRequest $request, InscripcionClase $inscripcionClase): RedirectResponse
-    {
-        $inscripcionClase->update($request->validated());
-
-        return redirect()->route('inscripcion-clases.index')->with('success', 'Inscripción actualizada correctamente.');
-    }
-
-    public function destroy(InscripcionClase $inscripcionClase): RedirectResponse
-    {
-        $inscripcionClase->delete();
-
-        return redirect()->route('inscripcion-clases.index')->with('success', 'Inscripción eliminada correctamente.');
+        return redirect()->route('inscripciones.index')
+            ->with('success', 'Inscripción cancelada correctamente.');
     }
 }

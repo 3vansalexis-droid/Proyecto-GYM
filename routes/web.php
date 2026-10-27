@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('pagos', PagoController::class);
     Route::resource('entrenadores', EntrenadorController::class)->parameters(['entrenadores' => 'entrenador']);
     Route::resource('clases', ClaseController::class);
-    Route::resource('inscripcion-clases', InscripcionClaseController::class);
+    Route::resource('inscripcion-clases', InscripcionClaseController::class)->names('inscripciones');
+    Route::redirect('/inscripciones', '/inscripcion-clases');
+    Route::redirect('/inscripciones/create', '/inscripcion-clases/create');
 });
 
