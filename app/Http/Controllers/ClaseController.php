@@ -24,7 +24,9 @@ class ClaseController extends Controller
 
     public function create(): View
     {
-        $entrenadores = Entrenador::orderBy('nombre')->get();
+        $entrenadores = Entrenador::where('activo', true)
+            ->orderBy('nombre')
+            ->get();
 
         return view('clases.form', [
             'clase' => new Clase(),
@@ -49,7 +51,10 @@ class ClaseController extends Controller
     public function edit($id): View
     {
         $clase = Clase::findOrFail($id);
-        $entrenadores = Entrenador::orderBy('nombre')->get();
+        $entrenadores = Entrenador::where('activo', true)
+            ->orWhere('id', $clase->entrenador_id)
+            ->orderBy('nombre')
+            ->get();
 
         return view('clases.form', compact('clase', 'entrenadores'));
     }

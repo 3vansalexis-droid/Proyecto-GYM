@@ -15,7 +15,7 @@ class UpdatePagoRequest extends FormRequest
     {
         return [
             'suscripcion_id' => ['required', 'integer', 'exists:suscripciones,id'],
-            'monto' => ['required', 'numeric', 'min:0'],
+            'monto' => ['required', 'numeric', 'gt:0'],
             'metodo_pago' => ['required', 'in:efectivo,tarjeta_debito,tarjeta_credito,transferencia'],
             'fecha_pago' => ['required', 'date'],
         ];

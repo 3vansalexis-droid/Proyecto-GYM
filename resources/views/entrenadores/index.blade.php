@@ -3,15 +3,27 @@
 @section('title', 'Entrenadores')
 
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h4 mb-0">Entrenadores</h2>
-        <a href="{{ route('entrenadores.create') }}" class="btn btn-primary">Nuevo entrenador</a>
+    <div class="section-heading">
+        <div>
+            <h2>Entrenadores</h2>
+            <p>Administra los instructores y sus especialidades.</p>
+        </div>
+        <a href="{{ route('entrenadores.create') }}" class="btn btn-primary">
+            <i class="bi bi-person-plus-fill me-1"></i>Nuevo entrenador
+        </a>
     </div>
 
-    <div class="card shadow-sm border-0">
+    @if (session('success'))
+        <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
+    @endif
+
+    <div class="card">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
@@ -24,16 +36,14 @@
                 <tbody>
                     @forelse ($entrenadores as $entrenador)
                         <tr>
-                            <td>{{ $entrenador->id }}</td>
-                            <td>{{ $entrenador->nombre }} {{ $entrenador->apellidos }}</td>
+                            <td>#{{ $entrenador->id }}</td>
+                            <td class="fw-semibold">{{ $entrenador->nombre }} {{ $entrenador->apellidos }}</td>
                             <td>{{ $entrenador->especialidad ?? '—' }}</td>
                             <td>{{ $entrenador->telefono ?? '—' }}</td>
                             <td>
-                                @if ($entrenador->activo)
-                                    <span class="badge bg-success">Activo</span>
-                                @else
-                                    <span class="badge bg-secondary">Inactivo</span>
-                                @endif
+                                <span class="badge text-bg-{{ $entrenador->activo ? 'success' : 'secondary' }}">
+                                    {{ $entrenador->activo ? 'Activo' : 'Inactivo' }}
+                                </span>
                             </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group">

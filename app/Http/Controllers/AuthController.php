@@ -34,8 +34,6 @@ class AuthController extends Controller
             'password.required' => 'La contraseña es obligatoria.',
         ]);
 
-        // Auth::attempt compara 'password' contra la columna password_hash
-        // (definida en Usuario::getAuthPasswordName) y filtra por activo = true.
         if (Auth::attempt([
             'email' => $credenciales['email'],
             'password' => $credenciales['password'],
@@ -43,15 +41,14 @@ class AuthController extends Controller
         ])) {
             $request->session()->regenerate();
 
-            return match (Auth::user()->rol?->nombre) {
-                'Administrador', 'Recepcionista' => redirect()->route('asistencias.create'),
-                'Entrenador' => redirect()->route('dashboard'),
-                default => redirect()->route('dashboard'),
+            $rutaPorDefecto = match (Auth::user()->rol?->nombre) {
+                'Administrador', 'Recepcionista' => route('asistencias.create'),
+                default => route('dashboard'),
             };
+
+            return redirect()->intended($rutaPorDefecto);
         }
 
-        // Si las credenciales son correctas pero la cuenta está desactivada,
-        // se muestra un mensaje específico.
         $usuario = Usuario::where('email', $credenciales['email'])->first();
 
         if ($usuario && ! $usuario->activo && Hash::check($credenciales['password'], $usuario->password_hash)) {

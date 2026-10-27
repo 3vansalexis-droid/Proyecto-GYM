@@ -1,35 +1,30 @@
 @extends('layouts.app')
 
+@section('title', 'Detalle del plan')
+
 @section('content')
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card bg-dark text-light border-secondary">
-                <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Detalle del Plan</h4>
-                    <span class="badge {{ $tipoMembresia->activo ? 'bg-success' : 'bg-secondary' }}">
-                        {{ $tipoMembresia->activo ? 'Activo' : 'Inactivo' }}
-                    </span>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item bg-dark text-light border-secondary">
-                            <strong>Nombre:</strong> {{ $tipoMembresia->nombre }}
-                        </li>
-                        <li class="list-group-item bg-dark text-light border-secondary">
-                            <strong>Duración:</strong> {{ $tipoMembresia->duracion_dias }} días
-                        </li>
-                        <li class="list-group-item bg-dark text-light border-secondary">
-                            <strong>Precio:</strong> ${{ number_format($tipoMembresia->precio, 2) }}
-                        </li>
-                    </ul>
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{{ route('tipos-membresia.index') }}" class="btn btn-secondary">Regresar</a>
-                        <a href="{{ route('tipos-membresia.edit', $tipoMembresia) }}" class="btn btn-warning">Editar</a>
-                    </div>
-                </div>
+    <div class="card mx-auto" style="max-width: 700px;">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 mb-0">{{ $tipoMembresia->nombre }}</h2>
+                <span class="badge text-bg-{{ $tipoMembresia->activo ? 'success' : 'secondary' }}">
+                    {{ $tipoMembresia->activo ? 'Activo' : 'Inactivo' }}
+                </span>
+            </div>
+
+            <dl class="row mb-0">
+                <dt class="col-sm-4">Nombre</dt>
+                <dd class="col-sm-8">{{ $tipoMembresia->nombre }}</dd>
+                <dt class="col-sm-4">Duración</dt>
+                <dd class="col-sm-8">{{ $tipoMembresia->duracion_dias }} días</dd>
+                <dt class="col-sm-4">Precio</dt>
+                <dd class="col-sm-8">${{ number_format($tipoMembresia->precio, 2) }}</dd>
+            </dl>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ route('tipos-membresia.index') }}" class="btn btn-outline-secondary">Volver</a>
+                <a href="{{ route('tipos-membresia.edit', $tipoMembresia) }}" class="btn btn-primary">Editar</a>
             </div>
         </div>
     </div>
-</div>
 @endsection

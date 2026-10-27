@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rol;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -40,7 +41,13 @@ class RolesController extends Controller
             'descripcion' => ['nullable', 'string', 'max:255'],
         ]);
 
-        Rol::create($datos);
+        try {
+            Rol::create($datos);
+        } catch (QueryException) {
+            return back()
+                ->withInput()
+                ->with('error', 'No se pudo crear el rol.');
+        }
 
         return redirect()
             ->route('roles.index')
@@ -75,7 +82,13 @@ class RolesController extends Controller
             'descripcion' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $rol->update($datos);
+        try {
+            $rol->update($datos);
+        } catch (QueryException) {
+            return back()
+                ->withInput()
+                ->with('error', 'No se pudo actualizar el rol.');
+        }
 
         return redirect()
             ->route('roles.index')
@@ -93,11 +106,16 @@ class RolesController extends Controller
                 ->with('error', 'No se puede eliminar el rol porque tiene usuarios asignados.');
         }
 
-        $rol->delete();
+        try {
+            $rol->delete();
+        } catch (QueryException) {
+            return redirect()
+                ->route('roles.index')
+                ->with('error', 'No se pudo eliminar el rol.');
+        }
 
         return redirect()
             ->route('roles.index')
             ->with('success', 'Rol eliminado correctamente.');
     }
 }
-

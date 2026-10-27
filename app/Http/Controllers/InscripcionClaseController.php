@@ -15,7 +15,7 @@ class InscripcionClaseController extends Controller
     public function index(): View
     {
         $inscripciones = InscripcionClase::with(['clase', 'socio'])
-            ->orderBy('id', 'desc')
+            ->orderByDesc('id')
             ->get();
 
         return view('inscripcion-clases.index', compact('inscripciones'));
@@ -23,8 +23,15 @@ class InscripcionClaseController extends Controller
 
     public function create(): View
     {
-        $clases = Clase::with('entrenador')->orderBy('nombre')->get();
-        $socios = Socio::orderBy('nombre')->get();
+        $clases = Clase::with('entrenador')
+            ->withCount('inscripciones')
+            ->orderBy('nombre')
+            ->get();
+
+        $socios = Socio::with('suscripcionesVigentes')
+            ->where('activo', true)
+            ->orderBy('nombre')
+            ->get();
 
         return view('inscripcion-clases.create', compact('clases', 'socios'));
     }
@@ -32,12 +39,12 @@ class InscripcionClaseController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'clase_id' => 'required|exists:clases,id',
-            'socio_id' => 'required|exists:socios,id',
+            'clase_id' => ['required', 'integer', 'exists:clases,id'],
+            'socio_id' => ['required', 'integer', 'exists:socios,id'],
         ]);
 
         try {
-            DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request): void {
                 $clase = Clase::where('id', $request->clase_id)
                     ->lockForUpdate()
                     ->firstOrFail();
@@ -72,7 +79,8 @@ class InscripcionClaseController extends Controller
                 ]);
             });
 
-            return redirect()->route('inscripciones.index')
+            return redirect()
+                ->route('inscripciones.index')
                 ->with('success', 'Socio inscrito correctamente en la clase.');
         } catch (\RuntimeException $e) {
             return back()->withInput()->with('error', $e->getMessage());
@@ -84,7 +92,8 @@ class InscripcionClaseController extends Controller
         $inscripcion = InscripcionClase::findOrFail($id);
         $inscripcion->delete();
 
-        return redirect()->route('inscripciones.index')
+        return redirect()
+            ->route('inscripciones.index')
             ->with('success', 'Inscripción cancelada correctamente.');
     }
 }

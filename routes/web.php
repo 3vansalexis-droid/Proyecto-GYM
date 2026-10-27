@@ -36,6 +36,15 @@ Route::middleware('auth')->group(function () {
         Route::resource('inscripcion-clases', InscripcionClaseController::class)
             ->only(['index', 'create', 'store', 'destroy'])
             ->names('inscripciones');
+
+        Route::redirect('/inscripciones', '/inscripcion-clases');
+        Route::redirect('/inscripciones/create', '/inscripcion-clases/create');
+
+        Route::resource('asistencias', AsistenciasController::class)
+            ->only(['edit', 'update', 'destroy']);
+
+        Route::patch('/pagos/{pago}/anular', [PagoController::class, 'anular'])
+            ->name('pagos.anular');
     });
 
     Route::middleware('role:Administrador,Recepcionista')->group(function () {
@@ -43,15 +52,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/asistencias/recepcion', [AsistenciasController::class, 'create'])->name('asistencias.create');
         Route::post('/asistencias/recepcion', [AsistenciasController::class, 'store'])->name('asistencias.store');
         Route::resource('asistencias', AsistenciasController::class)
-            ->except(['create', 'store']);
+            ->only(['index', 'show']);
         Route::resource('suscripciones', SuscripcionController::class)->parameters(['suscripciones' => 'suscripcion']);
-        Route::resource('pagos', PagoController::class);
+        Route::resource('pagos', PagoController::class)->only(['index', 'create', 'store', 'show']);
     });
 
     Route::middleware('role:Administrador,Entrenador')->group(function () {
         Route::resource('clases', ClaseController::class);
     });
-
-    Route::redirect('/inscripciones', '/inscripcion-clases');
-    Route::redirect('/inscripciones/create', '/inscripcion-clases/create');
 });

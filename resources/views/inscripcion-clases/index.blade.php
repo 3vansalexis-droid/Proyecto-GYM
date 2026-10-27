@@ -1,62 +1,67 @@
 @extends('layouts.app')
 
-@section('title', 'Inscripciones a Clases')
+@section('title', 'Inscripciones a clases')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="text-white mb-0">Inscripciones a Clases</h3>
-    <a href="{{ route('inscripciones.create') }}" class="btn btn-primary">Nueva Inscripción</a>
-</div>
+    <div class="section-heading">
+        <div>
+            <h2>Inscripciones a clases</h2>
+            <p>Administra los socios inscritos en cada clase grupal.</p>
+        </div>
+        <a href="{{ route('inscripciones.create') }}" class="btn btn-primary">
+            <i class="bi bi-person-plus-fill me-1"></i>Nueva inscripción
+        </a>
+    </div>
 
-@if (session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
+    @if (session('success'))
+        <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+    @endif
 
-@if (session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
+    @endif
 
-<div class="card shadow-sm border-0">
-    <div class="card-body p-0">
+    <div class="card">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th class="ps-4">Socio</th>
+                        <th>ID</th>
+                        <th>Socio</th>
                         <th>Clase</th>
                         <th>Horario</th>
-                        <th>Fecha de Inscripción</th>
-                        <th class="text-end pe-4">Acciones</th>
+                        <th>Fecha de inscripción</th>
+                        <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($inscripciones as $inscripcion)
                         <tr>
-                            <td class="ps-4 fw-semibold text-white">
-                                {{ $inscripcion->socio->nombre ?? 'N/A' }} {{ $inscripcion->socio->apellidos ?? $inscripcion->socio->apellido ?? '' }}
+                            <td>#{{ $inscripcion->id }}</td>
+                            <td class="fw-semibold">
+                                {{ $inscripcion->socio->nombre ?? 'N/A' }} {{ $inscripcion->socio->apellidos ?? '' }}
                             </td>
                             <td>{{ $inscripcion->clase->nombre ?? 'N/A' }}</td>
                             <td>
-                                {{ $inscripcion->clase->dia_semana ?? '' }} 
-                                ({{ is_object($inscripcion->clase->hora_inicio ?? null) ? $inscripcion->clase->hora_inicio->format('H:i') : substr($inscripcion->clase->hora_inicio ?? '', 0, 5) }} - {{ is_object($inscripcion->clase->hora_fin ?? null) ? $inscripcion->clase->hora_fin->format('H:i') : substr($inscripcion->clase->hora_fin ?? '', 0, 5) }})
+                                {{ $inscripcion->clase->dia_semana ?? '' }}
+                                ({{ optional($inscripcion->clase?->hora_inicio)->format('H:i') }} - {{ optional($inscripcion->clase?->hora_fin)->format('H:i') }})
                             </td>
-                            <td>{{ substr($inscripcion->fecha_inscripcion, 0, 10) }}</td>
-                            <td class="text-end pe-4">
+                            <td>{{ optional($inscripcion->fecha_inscripcion)->format('d/m/Y') ?? substr((string) $inscripcion->fecha_inscripcion, 0, 10) }}</td>
+                            <td class="text-end">
                                 <form action="{{ route('inscripciones.destroy', $inscripcion->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Deseas dar de baja esta inscripción?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger">Dar de baja</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Dar de baja</button>
                                 </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">No hay inscripciones registradas.</td>
+                            <td colspan="6" class="text-center text-muted py-4">No hay inscripciones registradas.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
-</div>
 @endsection

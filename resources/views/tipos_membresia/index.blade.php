@@ -1,87 +1,75 @@
 @extends('layouts.app')
 
+@section('title', 'Tipos de membresía')
+
 @section('content')
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-light mb-0">Tipos de Membresía</h2>
+    <div class="section-heading">
+        <div>
+            <h2>Tipos de membresía</h2>
+            <p>Administra los planes disponibles para tus socios.</p>
+        </div>
         <a href="{{ route('tipos-membresia.create') }}" class="btn btn-primary">
-            + Nuevo Plan
+            <i class="bi bi-plus-circle me-1"></i>Nuevo plan
         </a>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+    @if (session('success'))
+        <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
     @endif
 
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    <div class="card bg-dark text-light border-secondary">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-dark table-hover mb-0 align-middle">
-                    <thead class="table-secondary text-uppercase fs-7">
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Duración</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($tiposMembresia as $tipo)
                         <tr>
-                            <th scope="col" class="ps-3">ID</th>
-                            <th scope="col">Nombre</th>
-                            <th scope="col">Duración</th>
-                            <th scope="col">Precio</th>
-                            <th scope="col">Estado</th>
-                            <th scope="col" class="text-end pe-3">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($tiposMembresia as $tipo)
-                            <tr>
-                                <td class="ps-3">{{ $tipo->id }}</td>
-                                <td class="fw-bold">{{ $tipo->nombre }}</td>
-                                <td>{{ $tipo->duracion_dias }} días</td>
-                                <td>${{ number_format($tipo->precio, 2) }}</td>
-                                <td>
-                                    @if($tipo->activo)
-                                        <span class="badge bg-success">Activo</span>
-                                    @else
-                                        <span class="badge bg-secondary">Inactivo</span>
-                                    @endif
-                                </td>
-                                <td class="text-end pe-3">
-                                    <a href="{{ route('tipos-membresia.show', $tipo) }}" class="btn btn-sm btn-outline-info me-1">
-                                        Ver
-                                    </a>
-                                    <a href="{{ route('tipos-membresia.edit', $tipo) }}" class="btn btn-sm btn-outline-warning me-1">
-                                        Editar
-                                    </a>
-                                    <form action="{{ route('tipos-membresia.destroy', $tipo) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar este plan?');">
+                            <td>#{{ $tipo->id }}</td>
+                            <td class="fw-semibold">{{ $tipo->nombre }}</td>
+                            <td>{{ $tipo->duracion_dias }} días</td>
+                            <td>${{ number_format($tipo->precio, 2) }}</td>
+                            <td>
+                                <span class="badge text-bg-{{ $tipo->activo ? 'success' : 'secondary' }}">
+                                    {{ $tipo->activo ? 'Activo' : 'Inactivo' }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('tipos-membresia.show', $tipo) }}" class="btn btn-outline-secondary">Ver</a>
+                                    <a href="{{ route('tipos-membresia.edit', $tipo) }}" class="btn btn-outline-primary">Editar</a>
+                                    <form action="{{ route('tipos-membresia.destroy', $tipo) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar este plan?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            Eliminar
-                                        </button>
+                                        <button type="submit" class="btn btn-outline-danger">Eliminar</button>
                                     </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">
-                                    No hay tipos de membresía registrados aún.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                No hay tipos de membresía registrados aún.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <div class="mt-3">
+    <div class="mt-4">
         {{ $tiposMembresia->links() }}
     </div>
-</div>
 @endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Rol;
 use App\Models\Usuario;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,7 +38,6 @@ class UsuariosController extends Controller
 
     /**
      * Guarda un nuevo usuario.
-     * La contraseña se encripta automáticamente en el modelo (Hash::make).
      */
     public function store(Request $request): RedirectResponse
     {
@@ -49,13 +49,19 @@ class UsuariosController extends Controller
             'activo' => ['sometimes', 'boolean'],
         ]);
 
-        Usuario::create([
-            'rol_id' => $datos['rol_id'],
-            'nombre' => $datos['nombre'],
-            'email' => $datos['email'],
-            'password_hash' => $datos['password'],
-            'activo' => $request->boolean('activo', true),
-        ]);
+        try {
+            Usuario::create([
+                'rol_id' => $datos['rol_id'],
+                'nombre' => $datos['nombre'],
+                'email' => $datos['email'],
+                'password_hash' => $datos['password'],
+                'activo' => $request->boolean('activo', true),
+            ]);
+        } catch (QueryException) {
+            return back()
+                ->withInput()
+                ->with('error', 'No se pudo crear el usuario en la base de datos.');
+        }
 
         return redirect()
             ->route('usuarios.index')
@@ -95,18 +101,32 @@ class UsuariosController extends Controller
             'activo' => ['sometimes', 'boolean'],
         ]);
 
+        $activo = $request->boolean('activo');
+
+        if (Auth::id() === $usuario->id && (! $activo || (int) $datos['rol_id'] !== $usuario->rol_id)) {
+            return back()
+                ->withInput()
+                ->with('error', 'No puedes desactivar tu propia cuenta ni cambiar tu propio rol.');
+        }
+
         $usuario->fill([
             'rol_id' => $datos['rol_id'],
             'nombre' => $datos['nombre'],
             'email' => $datos['email'],
-            'activo' => $request->boolean('activo'),
+            'activo' => $activo,
         ]);
 
         if (! empty($datos['password'])) {
             $usuario->password_hash = $datos['password'];
         }
 
-        $usuario->save();
+        try {
+            $usuario->save();
+        } catch (QueryException) {
+            return back()
+                ->withInput()
+                ->with('error', 'No se pudo actualizar el usuario.');
+        }
 
         return redirect()
             ->route('usuarios.index')
@@ -130,11 +150,16 @@ class UsuariosController extends Controller
                 ->with('error', 'El usuario tiene pagos o asistencias registradas. Desactívalo en lugar de eliminarlo.');
         }
 
-        $usuario->delete();
+        try {
+            $usuario->delete();
+        } catch (QueryException) {
+            return redirect()
+                ->route('usuarios.index')
+                ->with('error', 'No se pudo eliminar el usuario porque tiene registros asociados.');
+        }
 
         return redirect()
             ->route('usuarios.index')
             ->with('success', 'Usuario eliminado correctamente.');
     }
 }
-

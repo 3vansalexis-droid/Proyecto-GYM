@@ -17,6 +17,9 @@ class Pago extends Model
         'monto',
         'metodo_pago',
         'fecha_pago',
+        'anulado_at',
+        'anulado_por',
+        'motivo_anulacion',
     ];
 
     protected function casts(): array
@@ -24,6 +27,7 @@ class Pago extends Model
         return [
             'monto' => 'decimal:2',
             'fecha_pago' => 'datetime',
+            'anulado_at' => 'datetime',
         ];
     }
 
@@ -35,5 +39,15 @@ class Pago extends Model
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
+    }
+
+    public function anulador(): BelongsTo
+    {
+        return $this->belongsTo(Usuario::class, 'anulado_por');
+    }
+
+    public function estaAnulado(): bool
+    {
+        return $this->anulado_at !== null;
     }
 }

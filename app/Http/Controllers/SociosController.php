@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Socio;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -12,6 +15,8 @@ class SociosController extends Controller
 {
     public function index(): View
     {
+        $this->normalizarClavesExistentes();
+
         $socios = Socio::orderBy('apellidos')
             ->orderBy('nombre')
             ->paginate(15);
@@ -29,18 +34,29 @@ class SociosController extends Controller
         $datos = $request->validate([
             'nombre' => ['required', 'string', 'max:255'],
             'apellidos' => ['required', 'string', 'max:255'],
-            'telefono' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255'],
-            'fecha_nacimiento' => ['nullable', 'date'],
+            'telefono' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:socios,email'],
+            'fecha_nacimiento' => ['nullable', 'date', 'before:today'],
             'activo' => ['sometimes', 'boolean'],
         ]);
 
-        $ultimoId = \App\Models\Socio::max('id') ?? 0;
-        $nuevaClave = 'SOC-' . str_pad($ultimoId + 1, 6, '0', STR_PAD_LEFT);
+        try {
+            DB::transaction(function () use ($datos, $request): void {
+                $socio = Socio::create([
+                    ...$datos,
+                    'clave_socio' => 'TMP-' . Str::uuid(),
+                    'activo' => $request->boolean('activo', true),
+                ]);
 
-        $datos['clave_socio'] = $nuevaClave;
-        $datos['activo'] = $request->boolean('activo', true);
-        Socio::create($datos);
+                $socio->update([
+                    'clave_socio' => Socio::generarClave($socio->id),
+                ]);
+            });
+        } catch (QueryException) {
+            return back()
+                ->withInput()
+                ->with('error', 'Error al registrar el socio en la base de datos.');
+        }
 
         return redirect()
             ->route('socios.index')
@@ -62,17 +78,23 @@ class SociosController extends Controller
     public function update(Request $request, Socio $socio): RedirectResponse
     {
         $datos = $request->validate([
-            'clave_socio' => ['required', 'string', 'max:255', Rule::unique('socios', 'clave_socio')->ignore($socio->id)],
+            'clave_socio' => ['required', 'string', 'max:50', Rule::unique('socios', 'clave_socio')->ignore($socio->id)],
             'nombre' => ['required', 'string', 'max:255'],
             'apellidos' => ['required', 'string', 'max:255'],
-            'telefono' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255'],
-            'fecha_nacimiento' => ['nullable', 'date'],
+            'telefono' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('socios', 'email')->ignore($socio->id)],
+            'fecha_nacimiento' => ['nullable', 'date', 'before:today'],
             'activo' => ['sometimes', 'boolean'],
         ]);
 
-        $datos['activo'] = $request->boolean('activo');
-        $socio->update($datos);
+        try {
+            $datos['activo'] = $request->boolean('activo');
+            $socio->update($datos);
+        } catch (QueryException) {
+            return back()
+                ->withInput()
+                ->with('error', 'No se pudo actualizar la información del socio.');
+        }
 
         return redirect()
             ->route('socios.index')
@@ -87,10 +109,38 @@ class SociosController extends Controller
                 ->with('error', 'El socio tiene registros relacionados. Desactívalo en lugar de eliminarlo.');
         }
 
-        $socio->delete();
+        try {
+            $socio->delete();
+        } catch (QueryException) {
+            return redirect()
+                ->route('socios.index')
+                ->with('error', 'No se puede eliminar el socio porque tiene registros asociados.');
+        }
 
         return redirect()
             ->route('socios.index')
             ->with('success', 'Socio eliminado correctamente.');
+    }
+
+    /**
+     * Unifica claves antiguas de 6 dígitos (ej. SOC-000006) al formato de 3 dígitos (SOC-006).
+     */
+    private function normalizarClavesExistentes(): void
+    {
+        $socios = Socio::where('clave_socio', 'like', 'SOC-000%')->get();
+
+        foreach ($socios as $socio) {
+            if (preg_match('/^SOC-0*(\d+)$/', $socio->clave_socio, $coincidencias)) {
+                $claveUnificada = Socio::generarClave((int) $coincidencias[1]);
+
+                $yaExiste = Socio::where('clave_socio', $claveUnificada)
+                    ->where('id', '!=', $socio->id)
+                    ->exists();
+
+                if (! $yaExiste && $socio->clave_socio !== $claveUnificada) {
+                    $socio->update(['clave_socio' => $claveUnificada]);
+                }
+            }
+        }
     }
 }

@@ -1,10 +1,12 @@
 <div class="row g-3">
-    <div class="col-md-6">
-        <label for="clave_socio" class="form-label">Clave del socio</label>
-        <input type="text" id="clave_socio" name="clave_socio" value="{{ old('clave_socio', $socio->clave_socio ?? '') }}" class="form-control @error('clave_socio') is-invalid @enderror" required>
-        @error('clave_socio')<div class="invalid-feedback">{{ $message }}</div>@enderror
-    </div>
-    <div class="col-md-6">
+    @isset($socio)
+        <div class="col-md-6">
+            <label for="clave_socio" class="form-label">Clave del socio</label>
+            <input type="text" id="clave_socio" name="clave_socio" value="{{ old('clave_socio', $socio->clave_socio) }}" class="form-control @error('clave_socio') is-invalid @enderror" required>
+            @error('clave_socio')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
+    @endisset
+    <div class="{{ isset($socio) ? 'col-md-6' : 'col-12' }}">
         <label for="nombre" class="form-label">Nombre</label>
         <input type="text" id="nombre" name="nombre" value="{{ old('nombre', $socio->nombre ?? '') }}" class="form-control @error('nombre') is-invalid @enderror" required>
         @error('nombre')<div class="invalid-feedback">{{ $message }}</div>@enderror

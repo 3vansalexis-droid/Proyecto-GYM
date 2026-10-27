@@ -3,34 +3,51 @@
 @section('title', 'Clases')
 
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h4 mb-0">Clases</h2>
-        <a href="{{ route('clases.create') }}" class="btn btn-primary">Nueva clase</a>
+    <div class="section-heading">
+        <div>
+            <h2>Clases</h2>
+            <p>Consulta y administra los horarios, entrenadores y cupos de cada sesión.</p>
+        </div>
+        <a href="{{ route('clases.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Nueva clase
+        </a>
     </div>
 
-    <div class="card shadow-sm border-0">
+    @if (session('success'))
+        <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
+    @endif
+
+    <div class="card">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
                         <th>Entrenador</th>
                         <th>Día</th>
                         <th>Horario</th>
-                        <th>Cupo</th>
+                        <th>Ocupación</th>
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($clases as $clase)
                         <tr>
-                            <td>{{ $clase->id }}</td>
-                            <td>{{ $clase->nombre }}</td>
+                            <td>#{{ $clase->id }}</td>
+                            <td class="fw-semibold">{{ $clase->nombre }}</td>
                             <td>{{ $clase->entrenador?->nombre }} {{ $clase->entrenador?->apellidos }}</td>
-                            <td>{{ $clase->dia_semana }}</td>
-                            <td>{{ $clase->hora_inicio }} - {{ $clase->hora_fin }}</td>
-                            <td>{{ $clase->cupo_maximo }}</td>
+                            <td><span class="badge text-bg-secondary">{{ $clase->dia_semana }}</span></td>
+                            <td>{{ optional($clase->hora_inicio)->format('H:i') }} - {{ optional($clase->hora_fin)->format('H:i') }}</td>
+                            <td>
+                                @php($inscritos = $clase->inscripciones_count ?? 0)
+                                <span class="badge text-bg-{{ $inscritos >= $clase->cupo_maximo ? 'danger' : 'success' }}">
+                                    {{ $inscritos }} / {{ $clase->cupo_maximo }}
+                                </span>
+                            </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a href="{{ route('clases.show', $clase) }}" class="btn btn-outline-secondary">Ver</a>

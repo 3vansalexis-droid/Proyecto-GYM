@@ -1,29 +1,37 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="dark">
+<html lang="es">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Iniciar sesión | {{ config('app.name', 'Gym System') }}</title>
+        <title>Iniciar sesión | Gym System</title>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="bg-body-tertiary">
-        <main class="container d-flex align-items-center justify-content-center min-vh-100 py-4">
-            <div class="w-100" style="max-width: 420px;">
-                <div class="text-center mb-4">
-                    <i class="bi bi-heart-pulse-fill text-primary" style="font-size: 3rem;"></i>
-                    <h1 class="h3 fw-semibold mt-2 mb-1">{{ config('app.name', 'Gym System') }}</h1>
-                    <p class="text-body-secondary mb-0">Inicia sesión para continuar</p>
-                </div>
+    <body class="login-backdrop">
+        <main class="container-fluid d-flex align-items-center justify-content-center min-vh-100 p-3 p-md-4">
+            <div class="login-showcase" style="--login-hero-bg: url('{{ asset('images/login-hero-pastel.jpg') }}');">
+                {{-- Tarjeta flotante izquierda (estilo cristal / frosted) --}}
+                <div class="login-floating-card">
+                    <div>
+                        {{-- Logo estilo "e | FITNESS / Gym management" adaptado a Gym System --}}
+                        <div class="login-brand-lockup">
+                            <span class="login-brand-icon">
+                                <i class="bi bi-heart-pulse-fill"></i>
+                            </span>
+                            <span class="login-brand-divider"></span>
+                            <div class="text-start">
+                                <span class="login-brand-title">GYM SYSTEM</span>
+                                <small class="login-brand-subtitle">Control de gimnasio</small>
+                            </div>
+                        </div>
 
-                <div class="card border-0 shadow-lg">
-                    <div class="card-body p-4 p-sm-5">
+                        <h1 class="login-heading">Iniciar sesión</h1>
+
                         @if (session('status'))
-                            <div class="alert alert-success d-flex align-items-center" role="alert">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                <div>{{ session('status') }}</div>
+                            <div class="alert alert-success py-2 small text-center mb-3" role="alert">
+                                {{ session('status') }}
                             </div>
                         @endif
 
@@ -31,63 +39,71 @@
                             @csrf
 
                             <div class="mb-3">
-                                <label for="email" class="form-label">Correo electrónico</label>
-                                <div class="input-group has-validation">
-                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        name="email"
-                                        value="{{ old('email') }}"
-                                        class="form-control @error('email') is-invalid @enderror"
-                                        placeholder="correo@ejemplo.com"
-                                        autocomplete="email"
-                                        required
-                                        autofocus
-                                    >
-                                    @error('email')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value="{{ old('email') }}"
+                                    class="form-control login-input @error('email') is-invalid @enderror"
+                                    placeholder="Correo electrónico"
+                                    aria-label="Correo electrónico"
+                                    autocomplete="email"
+                                    required
+                                    autofocus
+                                >
+                                @error('email')
+                                    <div class="invalid-feedback text-start">{{ $message }}</div>
+                                @enderror
                             </div>
 
-                            <div class="mb-4">
-                                <label for="password" class="form-label">Contraseña</label>
-                                <div class="input-group has-validation">
-                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <div class="mb-3">
+                                <div class="position-relative">
                                     <input
                                         type="password"
                                         id="password"
                                         name="password"
-                                        class="form-control @error('password') is-invalid @enderror"
-                                        placeholder="••••••••"
+                                        class="form-control login-input pe-5 @error('password') is-invalid @enderror"
+                                        placeholder="Contraseña"
+                                        aria-label="Contraseña"
                                         autocomplete="current-password"
                                         required
                                     >
                                     <button
                                         type="button"
-                                        class="btn btn-outline-secondary"
+                                        class="login-eye-btn"
                                         id="togglePassword"
                                         aria-label="Mostrar u ocultar contraseña"
                                     >
                                         <i class="bi bi-eye"></i>
                                     </button>
                                     @error('password')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback text-start">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100 py-2">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar sesión
+                            <div class="d-flex justify-content-between align-items-center small text-body-secondary mb-4 px-1">
+                                <span><i class="bi bi-shield-lock text-primary me-1"></i>Sesión segura</span>
+                                <span>Personal autorizado</span>
+                            </div>
+
+                            <button type="submit" class="btn login-submit-btn w-100">
+                                Iniciar sesión
                             </button>
                         </form>
                     </div>
+
+                    <div class="login-card-footer">
+                        Recepción &nbsp;|&nbsp; Membresías &nbsp;|&nbsp; Clases
+                    </div>
                 </div>
 
-                <p class="text-center text-body-secondary small mt-4 mb-0">
-                    &copy; {{ date('Y') }} {{ config('app.name', 'Gym System') }}
-                </p>
+                {{-- Escenario visual derecho --}}
+                <div class="login-stage-caption d-none d-lg-flex">
+                    <span class="badge rounded-pill px-3 py-2">
+                        <i class="bi bi-lightning-charge-fill me-1"></i> Sistema de Control y Membresías
+                    </span>
+                </div>
             </div>
         </main>
 
@@ -104,4 +120,3 @@
         </script>
     </body>
 </html>
-

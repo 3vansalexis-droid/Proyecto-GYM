@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asistencia;
 use App\Models\Socio;
 use App\Models\Usuario;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class AsistenciasController extends Controller
     {
         $asistencias = Asistencia::with(['socio', 'usuario'])
             ->orderByDesc('fecha_hora')
-            ->get();
+            ->paginate(20);
 
         return view('asistencias.index', compact('asistencias'));
     }
@@ -29,17 +30,24 @@ class AsistenciasController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $datos = $request->validate([
-            'clave_socio' => ['required', 'string'],
+            'clave_socio' => ['required', 'string', 'max:50'],
         ], [
             'clave_socio.required' => 'Ingresa la clave del socio.',
         ]);
 
-        $socio = Socio::where('clave_socio', $datos['clave_socio'])->first();
+        $clave = trim($datos['clave_socio']);
+        $socio = Socio::where('clave_socio', $clave)->first();
 
         if (! $socio) {
             return back()
                 ->withInput()
                 ->with('error', 'No se encontró un socio con esa clave.');
+        }
+
+        if (! $socio->activo) {
+            return back()
+                ->withInput()
+                ->with('error', 'El socio se encuentra dado de baja (inactivo).');
         }
 
         $tieneSuscripcionActiva = $socio->suscripciones()
@@ -53,10 +61,17 @@ class AsistenciasController extends Controller
                 ->with('error', 'El socio no tiene una suscripción activa y vigente.');
         }
 
-        Asistencia::create([
-            'socio_id' => $socio->id,
-            'usuario_id' => Auth::id(),
-        ]);
+        try {
+            Asistencia::create([
+                'socio_id' => $socio->id,
+                'usuario_id' => Auth::id(),
+                'fecha_hora' => now(),
+            ]);
+        } catch (QueryException) {
+            return back()
+                ->withInput()
+                ->with('error', 'Error al registrar la asistencia en la base de datos.');
+        }
 
         return back()->with('success', 'Asistencia registrada correctamente.');
     }
@@ -87,7 +102,13 @@ class AsistenciasController extends Controller
             'fecha_hora' => ['required', 'date'],
         ]);
 
-        $asistencia->update($datos);
+        try {
+            $asistencia->update($datos);
+        } catch (QueryException) {
+            return back()
+                ->withInput()
+                ->with('error', 'No se pudo actualizar la asistencia.');
+        }
 
         return redirect()
             ->route('asistencias.index')
@@ -96,7 +117,13 @@ class AsistenciasController extends Controller
 
     public function destroy(Asistencia $asistencia): RedirectResponse
     {
-        $asistencia->delete();
+        try {
+            $asistencia->delete();
+        } catch (QueryException) {
+            return redirect()
+                ->route('asistencias.index')
+                ->with('error', 'No se pudo eliminar la asistencia.');
+        }
 
         return redirect()
             ->route('asistencias.index')

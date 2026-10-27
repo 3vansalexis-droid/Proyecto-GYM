@@ -3,10 +3,10 @@
 @section('title', 'Socios')
 
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="section-heading">
         <div>
-            <h2 class="h3 mb-1">Socios</h2>
-            <p class="text-body-secondary mb-0">Administra los socios del gimnasio.</p>
+            <h2>Socios</h2>
+            <p>Administra los socios registrados en el gimnasio.</p>
         </div>
         <a href="{{ route('socios.create') }}" class="btn btn-primary">
             <i class="bi bi-person-plus-fill me-1"></i>Nuevo socio
@@ -20,9 +20,9 @@
         <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
     @endif
 
-    <div class="card border-0 shadow-sm">
+    <div class="card">
         <div class="table-responsive">
-            <table class="table table-dark table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Clave</th>
@@ -44,18 +44,20 @@
                                 </span>
                             </td>
                             <td class="text-end">
-                                <a href="{{ route('socios.show', $socio) }}" class="btn btn-sm btn-outline-light">Ver</a>
-                                <a href="{{ route('socios.edit', $socio) }}" class="btn btn-sm btn-outline-primary">Editar</a>
-                                <form method="POST" action="{{ route('socios.destroy', $socio) }}" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                                </form>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('socios.show', $socio) }}" class="btn btn-outline-secondary">Ver</a>
+                                    <a href="{{ route('socios.edit', $socio) }}" class="btn btn-outline-primary">Editar</a>
+                                    <form method="POST" action="{{ route('socios.destroy', $socio) }}" onsubmit="return confirm('¿Deseas eliminar este socio?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger">Eliminar</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-body-secondary py-4">No hay socios registrados.</td>
+                            <td colspan="5" class="text-center text-muted py-4">No hay socios registrados.</td>
                         </tr>
                     @endforelse
                 </tbody>

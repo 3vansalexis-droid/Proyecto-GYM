@@ -17,6 +17,8 @@ class Usuario extends Authenticatable
 
     public $timestamps = false;
 
+    protected $with = ['rol'];
+
     protected $fillable = [
         'rol_id',
         'nombre',
@@ -38,10 +40,6 @@ class Usuario extends Authenticatable
         ];
     }
 
-    /**
-     * Encripta la contraseña con Hash::make() al asignarla.
-     * Si el valor ya es un hash, se guarda tal cual (evita doble encriptación).
-     */
     protected function passwordHash(): Attribute
     {
         return Attribute::make(
@@ -49,17 +47,11 @@ class Usuario extends Authenticatable
         );
     }
 
-    /**
-     * Columna usada por Auth para verificar la contraseña.
-     */
     public function getAuthPasswordName(): string
     {
         return 'password_hash';
     }
 
-    /**
-     * Un usuario pertenece a un rol.
-     */
     public function rol(): BelongsTo
     {
         return $this->belongsTo(Rol::class, 'rol_id');

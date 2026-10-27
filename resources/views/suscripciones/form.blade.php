@@ -3,10 +3,9 @@
 @section('title', isset($suscripcion->id) ? 'Editar suscripción' : 'Nueva suscripción')
 
 @section('content')
-    <div class="card shadow-sm border-0 mx-auto" style="max-width: 900px;">
+    <div class="card mx-auto" style="max-width: 900px;">
+        <div class="card-header">{{ isset($suscripcion->id) ? 'Editar suscripción' : 'Registrar nueva suscripción' }}</div>
         <div class="card-body p-4">
-            <h4 class="mb-4 text-white">{{ isset($suscripcion->id) ? 'Editar Suscripción' : 'Nueva Suscripción y Pago' }}</h4>
-
             @if ($errors->any())
                 <div class="alert alert-danger mb-4">
                     <ul class="mb-0 ps-3">
@@ -26,14 +25,29 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Socio</label>
-                        <select name="socio_id" class="form-select" required>
+                        <select name="socio_id" class="form-select @error('socio_id') is-invalid @enderror" required>
                             <option value="">-- Seleccionar socio --</option>
                             @foreach ($socios as $socio)
-                                <option value="{{ $socio->id }}" {{ old('socio_id', $suscripcion->socio_id ?? '') == $socio->id ? 'selected' : '' }}>
-                                    {{ $socio->nombre }} {{ $socio->apellidos ?? '' }}
+                                @php
+                                    $vigente = $socio->suscripcionesVigentes
+                                        ->where('id', '!=', $suscripcion->id ?? null)
+                                        ->first();
+                                @endphp
+                                <option
+                                    value="{{ $socio->id }}"
+                                    @selected(old('socio_id', $suscripcion->socio_id ?? '') == $socio->id)
+                                    @disabled($vigente !== null)
+                                >
+                                    {{ $socio->nombre }} {{ $socio->apellidos ?? '' }} ({{ $socio->clave_socio }})
+                                    @if ($vigente)
+                                        — [Suscripción vigente hasta {{ $vigente->fecha_fin->format('d/m/Y') }}]
+                                    @endif
                                 </option>
                             @endforeach
                         </select>
+                        @error('socio_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="col-md-6">
@@ -57,13 +71,17 @@
 
                     @if (!isset($suscripcion->id))
                         <div class="col-md-6">
-                            <label class="form-label">Método de pago</label>
-                            <select name="metodo_pago" class="form-select" required>
-                                <option value="efectivo" {{ old('metodo_pago') === 'efectivo' ? 'selected' : '' }}>Efectivo</option>
-                                <option value="tarjeta_debito" {{ old('metodo_pago') === 'tarjeta_debito' ? 'selected' : '' }}>Tarjeta de débito</option>
-                                <option value="tarjeta_credito" {{ old('metodo_pago') === 'tarjeta_credito' ? 'selected' : '' }}>Tarjeta de crédito</option>
-                                <option value="transferencia" {{ old('metodo_pago') === 'transferencia' ? 'selected' : '' }}>Transferencia</option>
+                            <label class="form-label">Liquidación (Pago inicial)</label>
+                            <select name="metodo_pago" class="form-select">
+                                <option value="" {{ old('metodo_pago') === '' || old('metodo_pago') === null ? 'selected' : '' }}>
+                                    -- Dejar pendiente (Liquidar después en Pagos) --
+                                </option>
+                                <option value="efectivo" {{ old('metodo_pago') === 'efectivo' ? 'selected' : '' }}>Cobrar ahora · Efectivo</option>
+                                <option value="tarjeta_debito" {{ old('metodo_pago') === 'tarjeta_debito' ? 'selected' : '' }}>Cobrar ahora · Tarjeta de débito</option>
+                                <option value="tarjeta_credito" {{ old('metodo_pago') === 'tarjeta_credito' ? 'selected' : '' }}>Cobrar ahora · Tarjeta de crédito</option>
+                                <option value="transferencia" {{ old('metodo_pago') === 'transferencia' ? 'selected' : '' }}>Cobrar ahora · Transferencia</option>
                             </select>
+                            <div class="form-text">Si la dejas pendiente, la suscripción se activará automáticamente en cuanto la liquides en Pagos.</div>
                         </div>
                     @else
                         <div class="col-md-4">
@@ -87,7 +105,7 @@
                 <div class="d-flex justify-content-end gap-2 mt-4">
                     <a href="{{ route('suscripciones.index') }}" class="btn btn-outline-secondary">Cancelar</a>
                     <button type="submit" class="btn btn-primary">
-                        {{ isset($suscripcion->id) ? 'Actualizar' : 'Cobrar y Registrar' }}
+                        {{ isset($suscripcion->id) ? 'Guardar cambios' : 'Guardar suscripción' }}
                     </button>
                 </div>
             </form>
