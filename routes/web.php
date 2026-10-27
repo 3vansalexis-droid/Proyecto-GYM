@@ -14,7 +14,6 @@ use App\Http\Controllers\TipoMembresiaController;
 use App\Http\Controllers\UsuariosController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])
@@ -26,17 +25,17 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-
 Route::middleware('auth')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
 
-    
     Route::middleware('role:Administrador')->group(function () {
         Route::resource('roles', RolesController::class)->parameters(['roles' => 'rol']);
         Route::resource('usuarios', UsuariosController::class);
         Route::resource('tipos-membresia', TipoMembresiaController::class);
         Route::resource('entrenadores', EntrenadorController::class)->parameters(['entrenadores' => 'entrenador']);
-        Route::resource('inscripcion-clases', InscripcionClaseController::class)->names('inscripciones');
+        Route::resource('inscripcion-clases', InscripcionClaseController::class)
+            ->only(['index', 'create', 'store', 'destroy'])
+            ->names('inscripciones');
     });
 
     Route::middleware('role:Administrador,Recepcionista')->group(function () {

@@ -36,7 +36,7 @@
                         <option value="">-- Seleccionar entrenador --</option>
                         @foreach ($entrenadores as $entrenador)
                             <option value="{{ $entrenador->id }}" {{ old('entrenador_id', $clase->entrenador_id ?? '') == $entrenador->id ? 'selected' : '' }}>
-                                {{ $entrenador->nombre }} {{ $entrenador->apellido ?? '' }} ({{ $entrenador->especialidad ?? 'General' }})
+                                {{ $entrenador->nombre }} {{ $entrenador->apellidos ?? '' }} ({{ $entrenador->especialidad ?? 'General' }})
                             </option>
                         @endforeach
                     </select>
@@ -57,13 +57,13 @@
                 <div class="col-md-4">
                     <label class="form-label">Hora de inicio</label>
                     <input type="time" name="hora_inicio" class="form-control"
-                        value="{{ old('hora_inicio', isset($clase->hora_inicio) ? substr($clase->hora_inicio, 0, 5) : '') }}" required>
+                        value="{{ old('hora_inicio', $clase->hora_inicio?->format('H:i') ?? '') }}" required>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label">Hora de fin</label>
                     <input type="time" name="hora_fin" class="form-control"
-                        value="{{ old('hora_fin', isset($clase->hora_fin) ? substr($clase->hora_fin, 0, 5) : '') }}" required>
+                        value="{{ old('hora_fin', $clase->hora_fin?->format('H:i') ?? '') }}" required>
                 </div>
 
                 <div class="col-md-6">

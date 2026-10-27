@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreSuscripcionRequest extends FormRequest
 {
@@ -18,7 +19,11 @@ class StoreSuscripcionRequest extends FormRequest
     {
         return [
             'socio_id' => ['required', 'integer', 'exists:socios,id'],
-            'tipo_membresia_id' => ['required', 'integer', 'exists:tipos_membresia,id'],
+            'tipo_membresia_id' => [
+                'required',
+                'integer',
+                Rule::exists('tipos_membresia', 'id')->where('activo', true),
+            ],
             'fecha_inicio' => ['required', 'date'],
             'metodo_pago' => ['required', 'in:efectivo,tarjeta_debito,tarjeta_credito,transferencia'],
         ];

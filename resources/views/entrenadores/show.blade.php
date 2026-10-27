@@ -6,7 +6,7 @@
 <div class="card shadow-sm border-0 mx-auto" style="max-width: 700px;">
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0 text-white">{{ $entrenador->nombre }} {{ $entrenador->apellido ?? '' }}</h4>
+            <h4 class="mb-0 text-white">{{ $entrenador->nombre }} {{ $entrenador->apellidos ?? '' }}</h4>
             <span class="badge {{ $entrenador->estado === 'activo' || $entrenador->activo ? 'bg-success' : 'bg-secondary' }}">
                 {{ ucfirst($entrenador->estado ?? ($entrenador->activo ? 'Activo' : 'Inactivo')) }}
             </span>

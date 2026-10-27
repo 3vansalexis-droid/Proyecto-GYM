@@ -14,11 +14,17 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label">Suscripción</label>
-                        <input type="number" name="suscripcion_id" class="form-control" value="{{ old('suscripcion_id', $pago->suscripcion_id ?? '') }}" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Usuario</label>
-                        <input type="number" name="usuario_id" class="form-control" value="{{ old('usuario_id', $pago->usuario_id ?? '') }}" required>
+                        <select name="suscripcion_id" class="form-select" required>
+                            <option value="">-- Seleccionar suscripción --</option>
+                            @foreach ($suscripciones as $suscripcion)
+                                <option value="{{ $suscripcion->id }}" {{ (string) old('suscripcion_id', $pago->suscripcion_id ?? '') === (string) $suscripcion->id ? 'selected' : '' }}>
+                                    #{{ $suscripcion->id }} - {{ $suscripcion->socio?->nombre }} {{ $suscripcion->socio?->apellidos }} · {{ $suscripcion->tipoMembresia?->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('suscripcion_id')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Monto</label>

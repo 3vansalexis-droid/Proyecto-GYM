@@ -48,6 +48,11 @@
                                     <i class="bi bi-card-checklist me-1"></i>Membresías
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('entrenadores.index') }}">
+                                    <i class="bi bi-person-workspace me-1"></i>Entrenadores
+                                </a>
+                            </li>
                         @endif
                         @if (in_array(Auth::user()->rol?->nombre, ['Administrador', 'Recepcionista'], true))
                             <li class="nav-item">
@@ -65,6 +70,13 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('clases.index') }}">
                                     <i class="bi bi-calendar-event me-1"></i>Clases
+                                </a>
+                            </li>
+                        @endif
+                        @if (Auth::user()->rol?->nombre === 'Administrador')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('inscripciones.index') }}">
+                                    <i class="bi bi-person-plus me-1"></i>Inscripciones
                                 </a>
                             </li>
                         @endif

@@ -46,7 +46,7 @@
                 <div class="border-start border-3 border-primary ps-3">
                     <p class="text-muted mb-1 small text-uppercase">Entrenador Responsable</p>
                     <h5 class="text-white mb-1">
-                        {{ $clase->entrenador->nombre ?? 'Sin entrenador' }} {{ $clase->entrenador->apellido ?? '' }}
+                        {{ $clase->entrenador->nombre ?? 'Sin entrenador' }} {{ $clase->entrenador->apellidos ?? '' }}
                     </h5>
                     <span class="badge bg-secondary">
                         {{ $clase->entrenador->especialidad ?? 'General' }}
@@ -58,7 +58,7 @@
                 <div class="border-start border-3 border-info ps-3">
                     <p class="text-muted mb-1 small text-uppercase">Horario Programado</p>
                     <h5 class="text-white mb-1">
-                        {{ substr($clase->hora_inicio, 0, 5) }} - {{ substr($clase->hora_fin, 0, 5) }}
+                        {{ $clase->hora_inicio?->format('H:i') }} - {{ $clase->hora_fin?->format('H:i') }}
                     </h5>
                     <span class="text-muted small">Duración estimada por sesión</span>
                 </div>

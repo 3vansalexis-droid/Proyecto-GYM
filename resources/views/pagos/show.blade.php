@@ -8,7 +8,12 @@
             <h2 class="h4 mb-4">Pago #{{ $pago->id }}</h2>
             <dl class="row mb-0">
                 <dt class="col-sm-4">Suscripción</dt>
-                <dd class="col-sm-8">{{ $pago->suscripcion?->id ?? '—' }}</dd>
+                <dd class="col-sm-8">
+                    #{{ $pago->suscripcion?->id ?? '—' }}
+                    @if ($pago->suscripcion?->socio)
+                        · {{ $pago->suscripcion->socio->nombre }} {{ $pago->suscripcion->socio->apellidos }}
+                    @endif
+                </dd>
                 <dt class="col-sm-4">Usuario</dt>
                 <dd class="col-sm-8">{{ $pago->usuario?->nombre ?? '—' }}</dd>
                 <dt class="col-sm-4">Monto</dt>

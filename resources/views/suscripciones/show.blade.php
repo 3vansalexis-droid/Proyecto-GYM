@@ -15,7 +15,7 @@
         <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <p class="text-muted mb-1">Socio</p>
-                <h5 class="text-white">{{ $suscripcion->socio->nombre ?? 'N/A' }} {{ $suscripcion->socio->apellido ?? '' }}</h5>
+                <h5 class="text-white">{{ $suscripcion->socio->nombre ?? 'N/A' }} {{ $suscripcion->socio->apellidos ?? '' }}</h5>
             </div>
 
             <div class="col-md-6">
@@ -55,7 +55,7 @@
                             <td>${{ number_format($pago->monto, 2) }}</td>
                             <td><span class="badge bg-secondary">{{ ucfirst($pago->metodo_pago) }}</span></td>
                             <td>{{ \Carbon\Carbon::parse($pago->fecha_pago)->format('d/m/Y H:i') }}</td>
-                            <td>{{ $pago->usuario->name ?? 'Sistema' }}</td>
+                            <td>{{ $pago->usuario->nombre ?? 'Sistema' }}</td>
                         </tr>
                     @empty
                         <tr>

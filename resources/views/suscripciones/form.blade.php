@@ -30,7 +30,7 @@
                             <option value="">-- Seleccionar socio --</option>
                             @foreach ($socios as $socio)
                                 <option value="{{ $socio->id }}" {{ old('socio_id', $suscripcion->socio_id ?? '') == $socio->id ? 'selected' : '' }}>
-                                    {{ $socio->nombre }} {{ $socio->apellido ?? '' }}
+                                    {{ $socio->nombre }} {{ $socio->apellidos ?? '' }}
                                 </option>
                             @endforeach
                         </select>

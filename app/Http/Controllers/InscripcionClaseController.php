@@ -45,7 +45,7 @@ class InscripcionClaseController extends Controller
                 $totalInscritos = InscripcionClase::where('clase_id', $clase->id)->count();
 
                 if ($totalInscritos >= $clase->cupo_maximo) {
-                    throw new \Exception('No hay cupo disponible en esta clase.');
+                    throw new \RuntimeException('No hay cupo disponible en esta clase.');
                 }
 
                 $yaInscrito = InscripcionClase::where('clase_id', $clase->id)
@@ -53,7 +53,7 @@ class InscripcionClaseController extends Controller
                     ->exists();
 
                 if ($yaInscrito) {
-                    throw new \Exception('El socio ya está inscrito en esta clase.');
+                    throw new \RuntimeException('El socio ya está inscrito en esta clase.');
                 }
 
                 InscripcionClase::create([
@@ -65,7 +65,7 @@ class InscripcionClaseController extends Controller
 
             return redirect()->route('inscripciones.index')
                 ->with('success', 'Socio inscrito correctamente en la clase.');
-        } catch (\Exception $e) {
+        } catch (\RuntimeException $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
     }
