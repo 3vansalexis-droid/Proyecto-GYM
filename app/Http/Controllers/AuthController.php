@@ -43,7 +43,11 @@ class AuthController extends Controller
         ])) {
             $request->session()->regenerate();
 
-            return redirect()->route('asistencias.create');
+            return match (Auth::user()->rol?->nombre) {
+                'Administrador', 'Recepcionista' => redirect()->route('asistencias.create'),
+                'Entrenador' => redirect()->route('dashboard'),
+                default => redirect()->route('dashboard'),
+            };
         }
 
         // Si las credenciales son correctas pero la cuenta está desactivada,
