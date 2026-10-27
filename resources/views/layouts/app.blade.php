@@ -30,11 +30,13 @@
 
                 <div class="collapse navbar-collapse" id="mainNavbar">
                     <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('asistencias.create') }}">
-                                <i class="bi bi-calendar-check me-1"></i>Recepción
-                            </a>
-                        </li>
+                        @if (in_array(Auth::user()->rol?->nombre, ['Administrador', 'Recepcionista'], true))
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('asistencias.create') }}">
+                                    <i class="bi bi-calendar-check me-1"></i>Recepción
+                                </a>
+                            </li>
+                        @endif
                         @if (in_array(Auth::user()->rol?->nombre, ['Administrador', 'Recepcionista'], true))
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('socios.index') }}">

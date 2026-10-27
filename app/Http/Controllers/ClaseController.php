@@ -57,7 +57,15 @@ class ClaseController extends Controller
     public function update(UpdateClaseRequest $request, $id): RedirectResponse
     {
         $clase = Clase::findOrFail($id);
-        $clase->update($request->validated());
+        $datos = $request->validated();
+
+        if ((int) $datos['cupo_maximo'] < $clase->inscripciones()->count()) {
+            return back()
+                ->withInput()
+                ->withErrors(['cupo_maximo' => 'El cupo no puede ser menor que los socios inscritos actualmente.']);
+        }
+
+        $clase->update($datos);
 
         return redirect()->route('clases.index')->with('success', 'Clase actualizada correctamente.');
     }

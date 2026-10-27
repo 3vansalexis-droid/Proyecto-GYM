@@ -48,6 +48,15 @@ class InscripcionClaseController extends Controller
                     throw new \RuntimeException('No hay cupo disponible en esta clase.');
                 }
 
+                $socio = Socio::findOrFail($request->socio_id);
+
+                if (! $socio->activo || ! $socio->suscripciones()
+                    ->where('estado', 'activa')
+                    ->whereDate('fecha_fin', '>=', today())
+                    ->exists()) {
+                    throw new \RuntimeException('El socio debe tener una membresía activa y vigente.');
+                }
+
                 $yaInscrito = InscripcionClase::where('clase_id', $clase->id)
                     ->where('socio_id', $request->socio_id)
                     ->exists();
