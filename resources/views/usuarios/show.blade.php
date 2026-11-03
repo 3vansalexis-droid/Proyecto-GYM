@@ -21,7 +21,7 @@
             </dl>
             <div class="d-flex justify-content-end gap-2 mt-4">
                 <a href="{{ route('usuarios.index') }}" class="btn btn-outline-secondary">Volver</a>
-                @if (Auth::user()->rol?->nombre === 'Administrador')
+                @if (Auth::user()?->esAdministrador())
                     <a href="{{ route('usuarios.edit', $usuario) }}" class="btn btn-primary">Editar</a>
                     @if (Auth::id() !== $usuario->id)
                         <form method="POST" action="{{ route('usuarios.destroy', $usuario) }}" onsubmit="return confirm('¿Deseas eliminar a este usuario?');">

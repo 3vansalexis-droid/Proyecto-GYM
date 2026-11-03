@@ -28,21 +28,30 @@ class RolesController extends Controller
      */
     public function create(): View
     {
-        return view('roles.create');
+        $catalogoPermisos = Rol::CATALOGO_PERMISOS;
+
+        return view('roles.create', compact('catalogoPermisos'));
     }
 
     /**
-     * Guarda un nuevo rol.
+     * Guarda un nuevo rol con sus permisos seleccionados.
      */
     public function store(Request $request): RedirectResponse
     {
         $datos = $request->validate([
             'nombre' => ['required', 'string', 'max:50', 'unique:roles,nombre'],
             'descripcion' => ['nullable', 'string', 'max:255'],
+            'permisos' => ['nullable', 'array'],
+            'permisos.*' => ['string', Rule::in(array_keys(Rol::CATALOGO_PERMISOS))],
         ]);
 
         try {
-            Rol::create($datos);
+            $rol = Rol::create([
+                'nombre' => $datos['nombre'],
+                'descripcion' => $datos['descripcion'] ?? null,
+            ]);
+
+            $rol->sincronizarPermisos($datos['permisos'] ?? []);
         } catch (QueryException) {
             return back()
                 ->withInput()
@@ -51,39 +60,53 @@ class RolesController extends Controller
 
         return redirect()
             ->route('roles.index')
-            ->with('success', 'Rol creado correctamente.');
+            ->with('success', 'Rol y permisos creados correctamente.');
     }
 
     /**
-     * Muestra un rol con sus usuarios.
+     * Muestra un rol con sus permisos y usuarios asignados.
      */
     public function show(Rol $rol): View
     {
         $rol->load('usuarios');
+        $catalogoPermisos = Rol::CATALOGO_PERMISOS;
+        $permisosActivos = $rol->permisosEfectivos();
 
-        return view('roles.show', compact('rol'));
+        return view('roles.show', compact('rol', 'catalogoPermisos', 'permisosActivos'));
     }
 
     /**
-     * Formulario para editar un rol.
+     * Formulario para editar un rol y sus permisos.
      */
     public function edit(Rol $rol): View
     {
-        return view('roles.edit', compact('rol'));
+        $catalogoPermisos = Rol::CATALOGO_PERMISOS;
+        $permisosActuales = $rol->permisosEfectivos();
+
+        return view('roles.edit', compact('rol', 'catalogoPermisos', 'permisosActuales'));
     }
 
     /**
-     * Actualiza un rol existente.
+     * Actualiza un rol existente y sus permisos.
      */
     public function update(Request $request, Rol $rol): RedirectResponse
     {
         $datos = $request->validate([
             'nombre' => ['required', 'string', 'max:50', Rule::unique('roles', 'nombre')->ignore($rol->id)],
             'descripcion' => ['nullable', 'string', 'max:255'],
+            'permisos' => ['nullable', 'array'],
+            'permisos.*' => ['string', Rule::in(array_keys(Rol::CATALOGO_PERMISOS))],
         ]);
 
+        $esAdminRol = mb_strtolower(trim((string) $rol->nombre)) === 'administrador';
+
         try {
-            $rol->update($datos);
+            $rol->update([
+                'nombre' => $esAdminRol ? $rol->nombre : $datos['nombre'],
+                'descripcion' => $datos['descripcion'] ?? null,
+            ]);
+
+            $rol->sincronizarPermisos($datos['permisos'] ?? []);
         } catch (QueryException) {
             return back()
                 ->withInput()
@@ -92,7 +115,7 @@ class RolesController extends Controller
 
         return redirect()
             ->route('roles.index')
-            ->with('success', 'Rol actualizado correctamente.');
+            ->with('success', 'Rol y permisos actualizados correctamente.');
     }
 
     /**
@@ -100,6 +123,12 @@ class RolesController extends Controller
      */
     public function destroy(Rol $rol): RedirectResponse
     {
+        if (mb_strtolower(trim((string) $rol->nombre)) === 'administrador') {
+            return redirect()
+                ->route('roles.index')
+                ->with('error', 'El rol de Administrador principal no puede eliminarse.');
+        }
+
         if ($rol->usuarios()->exists()) {
             return redirect()
                 ->route('roles.index')
@@ -107,6 +136,7 @@ class RolesController extends Controller
         }
 
         try {
+            $rol->eliminarPermisosRespaldo();
             $rol->delete();
         } catch (QueryException) {
             return redirect()

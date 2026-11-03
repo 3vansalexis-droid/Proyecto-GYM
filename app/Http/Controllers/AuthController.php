@@ -41,10 +41,9 @@ class AuthController extends Controller
         ])) {
             $request->session()->regenerate();
 
-            $rutaPorDefecto = match (Auth::user()->rol?->nombre) {
-                'Administrador', 'Recepcionista' => route('asistencias.create'),
-                default => route('dashboard'),
-            };
+            $rutaPorDefecto = Auth::user()->tienePermiso('recepcion')
+                ? route('asistencias.create')
+                : route('dashboard');
 
             return redirect()->intended($rutaPorDefecto);
         }

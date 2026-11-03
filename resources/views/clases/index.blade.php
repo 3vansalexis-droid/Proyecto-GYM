@@ -43,7 +43,9 @@
                             <td><span class="badge text-bg-secondary">{{ $clase->dia_semana }}</span></td>
                             <td>{{ optional($clase->hora_inicio)->format('H:i') }} - {{ optional($clase->hora_fin)->format('H:i') }}</td>
                             <td>
-                                @php($inscritos = $clase->inscripciones_count ?? 0)
+                                @php
+                                    $inscritos = $clase->inscripciones_count ?? 0;
+                                @endphp
                                 <span class="badge text-bg-{{ $inscritos >= $clase->cupo_maximo ? 'danger' : 'success' }}">
                                     {{ $inscritos }} / {{ $clase->cupo_maximo }}
                                 </span>

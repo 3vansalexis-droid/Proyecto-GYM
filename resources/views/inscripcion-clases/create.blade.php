@@ -30,7 +30,9 @@
                     <select name="socio_id" class="form-select" required>
                         <option value="">-- Seleccionar socio --</option>
                         @foreach ($socios as $socio)
-                            @php($tieneVigente = $socio->suscripcionesVigentes->isNotEmpty())
+                            @php
+                                $tieneVigente = $socio->suscripcionesVigentes->isNotEmpty();
+                            @endphp
                             <option
                                 value="{{ $socio->id }}"
                                 @selected(old('socio_id') == $socio->id)

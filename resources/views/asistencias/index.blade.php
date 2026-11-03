@@ -42,7 +42,7 @@
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a href="{{ route('asistencias.show', $asistencia) }}" class="btn btn-outline-secondary">Ver</a>
-                                    @if (Auth::user()->rol?->nombre === 'Administrador')
+                                    @if (Auth::user()?->esAdministrador())
                                         <a href="{{ route('asistencias.edit', $asistencia) }}" class="btn btn-outline-primary">Editar</a>
                                         <form action="{{ route('asistencias.destroy', $asistencia) }}" method="POST" onsubmit="return confirm('¿Deseas eliminar esta asistencia?');">
                                             @csrf

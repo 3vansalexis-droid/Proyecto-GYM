@@ -57,7 +57,7 @@
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a href="{{ route('pagos.show', $pago) }}" class="btn btn-outline-secondary">Ver</a>
-                                    @if (Auth::user()->rol?->nombre === 'Administrador' && ! $pago->estaAnulado())
+                                    @if (Auth::user()?->esAdministrador() && ! $pago->estaAnulado())
                                         <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#anularPago{{ $pago->id }}">Anular</button>
                                     @endif
                                 </div>
@@ -73,7 +73,7 @@
         </div>
     </div>
 
-    @if (Auth::user()->rol?->nombre === 'Administrador')
+    @if (Auth::user()?->esAdministrador())
         @foreach ($pagos->whereNull('anulado_at') as $pago)
             <div class="modal fade" id="anularPago{{ $pago->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">

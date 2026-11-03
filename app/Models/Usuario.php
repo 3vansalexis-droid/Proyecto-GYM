@@ -66,4 +66,29 @@ class Usuario extends Authenticatable
     {
         return $this->hasMany(Asistencia::class, 'usuario_id');
     }
+
+    public function tienePermiso(string $permiso): bool
+    {
+        return $this->rol ? $this->rol->tienePermiso($permiso) : false;
+    }
+
+    /**
+     * @param  array<int, string>  $permisos
+     */
+    public function tieneAlgunPermiso(array $permisos): bool
+    {
+        foreach ($permisos as $permiso) {
+            if ($this->tienePermiso($permiso)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function esAdministrador(): bool
+    {
+        return mb_strtolower(trim((string) $this->rol?->nombre)) === 'administrador'
+            || $this->tienePermiso('administracion');
+    }
 }

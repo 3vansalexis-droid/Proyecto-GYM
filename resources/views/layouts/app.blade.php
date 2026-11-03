@@ -4,11 +4,16 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>@yield('title', 'Panel de control') | {{ config('app.name', 'Gym System') }}</title>
+        <title>@yield('title', 'Panel de control') | Gym System</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body>
-        @php($rol = Auth::user()->rol?->nombre)
+        @php
+            $usuarioActual = Auth::user();
+            $rol = $usuarioActual?->rol?->nombre;
+            $tieneOperacion = $usuarioActual?->tieneAlgunPermiso(['recepcion', 'socios', 'suscripciones', 'pagos', 'clases']);
+            $tieneAdmin = $usuarioActual?->tieneAlgunPermiso(['tipos_membresia', 'entrenadores', 'inscripciones', 'administracion']);
+        @endphp
         <div class="app-shell">
             <aside class="app-sidebar">
                 <a class="brand" href="{{ route('dashboard') }}">
@@ -22,42 +27,66 @@
                         <i class="bi bi-speedometer2"></i><span>Dashboard</span>
                     </a>
 
-                    @if (in_array($rol, ['Administrador', 'Recepcionista'], true))
+                    @if ($tieneOperacion)
                         <div class="sidebar-label px-2 pt-3 pb-1">Operación</div>
+                    @endif
+
+                    @if ($usuarioActual?->tienePermiso('recepcion'))
                         <a class="nav-link {{ request()->routeIs('asistencias.create') ? 'active' : '' }}" href="{{ route('asistencias.create') }}">
                             <i class="bi bi-upc-scan"></i><span>Recepción (Check-in)</span>
                         </a>
                         <a class="nav-link {{ request()->routeIs('asistencias.*') && ! request()->routeIs('asistencias.create') ? 'active' : '' }}" href="{{ route('asistencias.index') }}">
                             <i class="bi bi-calendar-check"></i><span>Asistencias</span>
                         </a>
+                    @endif
+
+                    @if ($usuarioActual?->tienePermiso('socios'))
                         <a class="nav-link {{ request()->routeIs('socios.*') ? 'active' : '' }}" href="{{ route('socios.index') }}">
                             <i class="bi bi-people-fill"></i><span>Socios</span>
                         </a>
+                    @endif
+
+                    @if ($usuarioActual?->tienePermiso('suscripciones'))
                         <a class="nav-link {{ request()->routeIs('suscripciones.*') ? 'active' : '' }}" href="{{ route('suscripciones.index') }}">
                             <i class="bi bi-calendar-plus"></i><span>Suscripciones</span>
                         </a>
+                    @endif
+
+                    @if ($usuarioActual?->tienePermiso('pagos'))
                         <a class="nav-link {{ request()->routeIs('pagos.*') ? 'active' : '' }}" href="{{ route('pagos.index') }}">
                             <i class="bi bi-cash-coin"></i><span>Pagos</span>
                         </a>
                     @endif
 
-                    @if (in_array($rol, ['Administrador', 'Entrenador'], true))
+                    @if ($usuarioActual?->tienePermiso('clases'))
                         <a class="nav-link {{ request()->routeIs('clases.*') ? 'active' : '' }}" href="{{ route('clases.index') }}">
                             <i class="bi bi-calendar-event"></i><span>Clases</span>
                         </a>
                     @endif
 
-                    @if ($rol === 'Administrador')
+                    @if ($tieneAdmin)
                         <div class="sidebar-label px-2 pt-3 pb-1">Administración</div>
+                    @endif
+
+                    @if ($usuarioActual?->tienePermiso('tipos_membresia'))
                         <a class="nav-link {{ request()->routeIs('tipos-membresia.*') ? 'active' : '' }}" href="{{ route('tipos-membresia.index') }}">
                             <i class="bi bi-card-checklist"></i><span>Membresías</span>
                         </a>
+                    @endif
+
+                    @if ($usuarioActual?->tienePermiso('entrenadores'))
                         <a class="nav-link {{ request()->routeIs('entrenadores.*') ? 'active' : '' }}" href="{{ route('entrenadores.index') }}">
                             <i class="bi bi-person-workspace"></i><span>Entrenadores</span>
                         </a>
+                    @endif
+
+                    @if ($usuarioActual?->tienePermiso('inscripciones'))
                         <a class="nav-link {{ request()->routeIs('inscripciones.*') ? 'active' : '' }}" href="{{ route('inscripciones.index') }}">
                             <i class="bi bi-person-plus"></i><span>Inscripciones</span>
                         </a>
+                    @endif
+
+                    @if ($usuarioActual?->tienePermiso('administracion'))
                         <a class="nav-link {{ request()->routeIs('usuarios.*') ? 'active' : '' }}" href="{{ route('usuarios.index') }}">
                             <i class="bi bi-person-badge-fill"></i><span>Usuarios</span>
                         </a>
@@ -70,7 +99,7 @@
                 <div class="sidebar-footer">
                     <div class="user-chip">
                         <span class="user-avatar"><i class="bi bi-person-fill"></i></span>
-                        <span class="text-truncate">{{ Auth::user()->nombre }}<small>{{ $rol }}</small></span>
+                        <span class="text-truncate">{{ $usuarioActual?->nombre }}<small>{{ $rol }}</small></span>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

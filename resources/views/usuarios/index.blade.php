@@ -8,7 +8,7 @@
             <h2>Usuarios</h2>
             <p>Administra el personal con acceso al sistema.</p>
         </div>
-        @if (Auth::user()->rol?->nombre === 'Administrador')
+        @if (Auth::user()?->esAdministrador())
             <a href="{{ route('usuarios.create') }}" class="btn btn-primary">
                 <i class="bi bi-person-plus-fill me-1"></i>Nuevo usuario
             </a>
@@ -33,7 +33,7 @@
                         <th>Email</th>
                         <th>Rol</th>
                         <th>Estado</th>
-                        @if (Auth::user()->rol?->nombre === 'Administrador')
+                        @if (Auth::user()?->esAdministrador())
                             <th class="text-end">Acciones</th>
                         @endif
                     </tr>
@@ -52,7 +52,7 @@
                                     {{ $usuario->activo ? 'Activo' : 'Inactivo' }}
                                 </span>
                             </td>
-                            @if (Auth::user()->rol?->nombre === 'Administrador')
+                            @if (Auth::user()?->esAdministrador())
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="{{ route('usuarios.show', $usuario) }}" class="btn btn-outline-secondary">Ver</a>

@@ -28,36 +28,52 @@ Route::post('/logout', [AuthController::class, 'logout'])
 Route::middleware('auth')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
 
-    Route::middleware('role:Administrador')->group(function () {
+    Route::middleware('role:permiso:administracion')->group(function () {
         Route::resource('roles', RolesController::class)->parameters(['roles' => 'rol']);
         Route::resource('usuarios', UsuariosController::class);
+        Route::resource('asistencias', AsistenciasController::class)
+            ->only(['edit', 'update', 'destroy']);
+        Route::patch('/pagos/{pago}/anular', [PagoController::class, 'anular'])
+            ->name('pagos.anular');
+    });
+
+    Route::middleware('role:permiso:tipos_membresia')->group(function () {
         Route::resource('tipos-membresia', TipoMembresiaController::class);
+    });
+
+    Route::middleware('role:permiso:entrenadores')->group(function () {
         Route::resource('entrenadores', EntrenadorController::class)->parameters(['entrenadores' => 'entrenador']);
+    });
+
+    Route::middleware('role:permiso:inscripciones')->group(function () {
         Route::resource('inscripcion-clases', InscripcionClaseController::class)
             ->only(['index', 'create', 'store', 'destroy'])
             ->names('inscripciones');
 
         Route::redirect('/inscripciones', '/inscripcion-clases');
         Route::redirect('/inscripciones/create', '/inscripcion-clases/create');
-
-        Route::resource('asistencias', AsistenciasController::class)
-            ->only(['edit', 'update', 'destroy']);
-
-        Route::patch('/pagos/{pago}/anular', [PagoController::class, 'anular'])
-            ->name('pagos.anular');
     });
 
-    Route::middleware('role:Administrador,Recepcionista')->group(function () {
+    Route::middleware('role:permiso:socios')->group(function () {
         Route::resource('socios', SociosController::class);
+    });
+
+    Route::middleware('role:permiso:recepcion')->group(function () {
         Route::get('/asistencias/recepcion', [AsistenciasController::class, 'create'])->name('asistencias.create');
         Route::post('/asistencias/recepcion', [AsistenciasController::class, 'store'])->name('asistencias.store');
         Route::resource('asistencias', AsistenciasController::class)
             ->only(['index', 'show']);
+    });
+
+    Route::middleware('role:permiso:suscripciones')->group(function () {
         Route::resource('suscripciones', SuscripcionController::class)->parameters(['suscripciones' => 'suscripcion']);
+    });
+
+    Route::middleware('role:permiso:pagos')->group(function () {
         Route::resource('pagos', PagoController::class)->only(['index', 'create', 'store', 'show']);
     });
 
-    Route::middleware('role:Administrador,Entrenador')->group(function () {
+    Route::middleware('role:permiso:clases')->group(function () {
         Route::resource('clases', ClaseController::class);
     });
 });
